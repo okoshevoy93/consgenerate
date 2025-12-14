@@ -16,10 +16,9 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.price_generation') }}">Прайсы</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.automation') }}">Автоматизация</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.config_page', config_name='sftp_price') }}">SFTP прайсов</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.config_page', config_name='sftp_auto') }}">SFTP автоматизации</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.price_generation') }}">Генерация файлов</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.automation') }}">Обновление Яндекс.Карт</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.settings') }}">Настройки</a></li>
             </ul>
         </div>
     </div>

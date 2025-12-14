@@ -7,3 +7,21 @@ body {
 pre {
     white-space: pre-wrap;
 }
+.navbar {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    border: none;
+    border-radius: 14px;
+}
+
+.btn-primary {
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.25);
+}
+
+.list-group-item {
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
+}

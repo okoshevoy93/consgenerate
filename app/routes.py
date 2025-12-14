@@ -26,6 +26,28 @@ CONFIG_LABELS = {
 
 LAST_ACTIVITY: Dict[str, str] = {}
 LOADED_CONFIGS: Dict[str, Optional[SFTPConfig]] = {"sftp_price": None, "sftp_auto": None}
+LOADED_SETTINGS: Dict[str, Dict[str, str]] = {"generation": {}, "update": {}}
+
+GENERATION_FIELDS = [
+    {"name": "yml_output", "label": "Путь сохранения YML для Яндекс", "placeholder": "/data/yandex/yml"},
+    {"name": "csv_output", "label": "Путь сохранения CSV для 2GIS", "placeholder": "/data/2gis/prices.csv"},
+    {"name": "xlsx_output", "label": "Путь сохранения XLSX для Яндекс", "placeholder": "/data/yandex/prices.xlsx"},
+    {"name": "cities_rf", "label": "Файл локаций городов РФ", "placeholder": "/data/cities/rf.xlsx"},
+    {"name": "cities_kz", "label": "Файл локаций городов КЗ", "placeholder": "/data/cities/kz.xlsx"},
+    {"name": "cities_rb", "label": "Файл локаций городов РБ", "placeholder": "/data/cities/rb.xlsx"},
+    {"name": "google_links_rf", "label": "Ссылки на Google-таблицы РФ", "placeholder": "/data/google/rf_links.json"},
+    {"name": "google_links_kz", "label": "Ссылки на Google-таблицы КЗ", "placeholder": "/data/google/kz_links.json"},
+    {"name": "google_links_rb", "label": "Ссылки на Google-таблицы РБ", "placeholder": "/data/google/rb_links.json"},
+    {"name": "google_api_json", "label": "JSON авторизации Google API", "placeholder": "/data/google/api_credentials.json"},
+]
+
+UPDATE_FIELDS = [
+    {"name": "automation_config", "label": "Файл конфигурации (yabussines.json)", "placeholder": "/var/www/html/YANDEX/yabussines.json"},
+    {"name": "scenario_remote", "label": "Папка сценариев/JSON", "placeholder": "/var/www/html/YANDEX/XLS/"},
+    {"name": "mapping_remote", "label": "Путь к mapping/menu", "placeholder": "/var/www/html/auth_menu/"},
+    {"name": "city_reference", "label": "Файл справочника городов", "placeholder": "/var/www/html/cities.json"},
+    {"name": "media_remote", "label": "Папка медиа/скриншотов", "placeholder": "/var/www/html/media"},
+]
 
 
 def _parse_config_form(data: dict) -> dict:
@@ -54,6 +76,21 @@ def home():
     return render_template('home.html', title='Главная')
 
 
+def _settings_store(scope: str) -> EncryptedConfigStore:
+    return EncryptedConfigStore(f"{scope}_settings")
+
+
+def _settings_fields(scope: str):
+    return GENERATION_FIELDS if scope == "generation" else UPDATE_FIELDS
+
+
+def _collect_settings(scope: str, form: dict) -> Dict[str, str]:
+    values = {}
+    for field in _settings_fields(scope):
+        values[field["name"]] = form.get(field["name"], "")
+    return values
+
+
 @main_bp.route('/config/<config_name>', methods=['GET', 'POST'])
 def config_page(config_name: str):
     store = EncryptedConfigStore(config_name)
@@ -65,9 +102,51 @@ def config_page(config_name: str):
         store.save(payload, password)
         flash('Конфигурация сохранена и зашифрована', 'success')
         return redirect(url_for('main.config_page', config_name=config_name))
-    if store.exists():
-        values = {"sftp_port": 22}
     return render_template('config.html', config_label=label, values=values)
+
+
+@main_bp.route('/settings')
+def settings():
+    return render_template(
+        'settings.html',
+        generation_fields=GENERATION_FIELDS,
+        update_fields=UPDATE_FIELDS,
+        generation_values=LOADED_SETTINGS.get("generation", {}),
+        update_values=LOADED_SETTINGS.get("update", {}),
+        editor_content=None,
+        editor_path=None,
+        editor_scope=None,
+    )
+
+
+@main_bp.route('/settings/<scope>/save', methods=['POST'])
+def save_settings(scope: str):
+    if scope not in LOADED_SETTINGS:
+        flash('Неизвестная секция настроек', 'warning')
+        return redirect(url_for('main.settings'))
+    password = request.form.get('password', '')
+    payload = _collect_settings(scope, request.form)
+    store = _settings_store(scope)
+    store.save(payload, password)
+    LOADED_SETTINGS[scope] = payload
+    flash('Настройки сохранены и зашифрованы', 'success')
+    return redirect(url_for('main.settings'))
+
+
+@main_bp.route('/settings/<scope>/load', methods=['POST'])
+def load_settings(scope: str):
+    if scope not in LOADED_SETTINGS:
+        flash('Неизвестная секция настроек', 'warning')
+        return redirect(url_for('main.settings'))
+    password = request.form.get('password', '')
+    store = _settings_store(scope)
+    data = store.load(password)
+    if not data:
+        flash('Не удалось загрузить настройки: проверьте пароль и наличие файла', 'danger')
+    else:
+        LOADED_SETTINGS[scope] = data
+        flash('Настройки загружены', 'success')
+    return redirect(url_for('main.settings'))
 
 
 @main_bp.route('/config/<config_name>/load', methods=['POST'])
@@ -86,7 +165,12 @@ def load_config(config_name: str):
 
 @main_bp.route('/price-generation')
 def price_generation():
-    return render_template('price_generation.html', config=LOADED_CONFIGS.get('sftp_price'), activity=LAST_ACTIVITY.get('price'))
+    return render_template(
+        'price_generation.html',
+        config=LOADED_CONFIGS.get('sftp_price'),
+        activity=LAST_ACTIVITY.get('price'),
+        settings=LOADED_SETTINGS.get("generation", {}),
+    )
 
 
 @main_bp.route('/price-generation/run', methods=['POST'])
@@ -126,7 +210,13 @@ def run_price_generation():
 def automation():
     query = request.args.get('query')
     cities = filter_cities(CITY_PRESETS, query)
-    return render_template('automation.html', cities=cities, query=query, activity=LAST_ACTIVITY.get('automation'))
+    return render_template(
+        'automation.html',
+        cities=cities,
+        query=query,
+        activity=LAST_ACTIVITY.get('automation'),
+        settings=LOADED_SETTINGS.get("update", {}),
+    )
 
 
 @main_bp.route('/automation/run', methods=['POST'])
@@ -159,3 +249,49 @@ def run_automation_action():
         LAST_ACTIVITY['automation'] = f"Ошибка: {exc}"
         flash('Ошибка при выполнении: %s' % exc, 'danger')
     return redirect(url_for('main.automation'))
+
+
+@main_bp.route('/config-editor/<scope>', methods=['POST'])
+def edit_remote_config(scope: str):
+    if scope not in ("generation", "update"):
+        flash('Неизвестная секция', 'warning')
+        return redirect(url_for('main.settings'))
+
+    config_key = 'sftp_price' if scope == 'generation' else 'sftp_auto'
+    config = LOADED_CONFIGS.get(config_key)
+    if not config:
+        flash('Сначала загрузите и расшифруйте SFTP конфигурацию', 'warning')
+        return redirect(url_for('main.settings'))
+
+    remote_path = request.form.get('remote_file', '').strip()
+    action = request.form.get('action', 'load')
+    content = request.form.get('content')
+    if not remote_path:
+        flash('Укажите путь к файлу', 'warning')
+        return redirect(url_for('main.settings'))
+
+    editor_content: Optional[str] = None
+    try:
+        from .sftp_client import SFTPClient
+
+        with SFTPClient(config) as client:
+            if action == 'save':
+                if content is None:
+                    flash('Нет данных для сохранения', 'warning')
+                else:
+                    client.write_text(remote_path, content)
+                    flash('Файл обновлён на SFTP', 'success')
+            editor_content = client.read_text(remote_path)
+    except Exception as exc:  # noqa: BLE001
+        flash(f'Не удалось обработать файл: {exc}', 'danger')
+
+    return render_template(
+        'settings.html',
+        generation_fields=GENERATION_FIELDS,
+        update_fields=UPDATE_FIELDS,
+        generation_values=LOADED_SETTINGS.get("generation", {}),
+        update_values=LOADED_SETTINGS.get("update", {}),
+        editor_content=editor_content,
+        editor_path=remote_path,
+        editor_scope=scope,
+    )

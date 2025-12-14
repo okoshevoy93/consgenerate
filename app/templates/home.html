@@ -1,21 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="row g-3">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card shadow-sm h-100">
             <div class="card-body">
-                <h5 class="card-title">Генерация прайсов</h5>
-                <p class="card-text text-muted">Веб-версия консольного скрипта console_generate_full_clean_progress_staticbar_FIXED2: загрузка данных, обновление меню, выгрузка на SFTP.</p>
+                <h5 class="card-title">Генерация файлов</h5>
+                <p class="card-text text-muted">Стартовая панель для сценариев console_generate_full_clean_progress_staticbar_FIXED2: загрузка меню, выгрузка YML/XLSX/CSV.</p>
                 <a href="{{ url_for('main.price_generation') }}" class="btn btn-primary">Открыть модуль</a>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card shadow-sm h-100">
             <div class="card-body">
-                <h5 class="card-title">Автоматизация Яндекс.Карт</h5>
-                <p class="card-text text-muted">Веб-обертка для авто-скрипта auto (3).py с управлением сценариями, городами и загрузкой файлов.</p>
+                <h5 class="card-title">Обновление Яндекс.Карт</h5>
+                <p class="card-text text-muted">UI для auto.py: управление сценариями, городами, медиа и загрузкой на SFTP.</p>
                 <a href="{{ url_for('main.automation') }}" class="btn btn-primary">Открыть модуль</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Настройки и конфиги</h5>
+                <p class="card-text text-muted">Секционные настройки с шифрованием, online-редактор файлов и доступ к SFTP для двух модулей.</p>
+                <a href="{{ url_for('main.settings') }}" class="btn btn-primary">Перейти</a>
             </div>
         </div>
     </div>

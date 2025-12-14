@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Настройки</h2>
+        <p class="text-muted mb-0">Разделённые секции для генерации прайсов и обновления Яндекс.Карт. Все значения шифруются через bcrypt + Fernet.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{{ url_for('main.config_page', config_name='sftp_price') }}">SFTP для генерации</a>
+        <a class="btn btn-outline-primary" href="{{ url_for('main.config_page', config_name='sftp_auto') }}">SFTP для обновления</a>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title mb-1">Генерация файлов</h5>
+                        <p class="text-muted small mb-3">Пути выгрузки и чтения данных для YML, XLSX, 2GIS и справочников городов.</p>
+                    </div>
+                    <form method="post" action="{{ url_for('main.load_settings', scope='generation') }}" class="d-flex gap-2">
+                        <input type="password" name="password" class="form-control form-control-sm" placeholder="Пароль" required>
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">Расшифровать</button>
+                    </form>
+                </div>
+                <form method="post" action="{{ url_for('main.save_settings', scope='generation') }}" class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Пароль для шифрования</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    {% for field in generation_fields %}
+                    <div class="col-12">
+                        <label class="form-label">{{ field.label }}</label>
+                        <input name="{{ field.name }}" value="{{ generation_values.get(field.name, '') }}" class="form-control" placeholder="{{ field.placeholder }}">
+                    </div>
+                    {% endfor %}
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">Значения используются как для чтения, так и для выгрузки.</span>
+                        <button class="btn btn-primary" type="submit">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title mb-1">Обновление Яндекс.Карт</h5>
+                        <p class="text-muted small mb-3">Пути конфигов, сценариев и медиа для веб-версии auto.py.</p>
+                    </div>
+                    <form method="post" action="{{ url_for('main.load_settings', scope='update') }}" class="d-flex gap-2">
+                        <input type="password" name="password" class="form-control form-control-sm" placeholder="Пароль" required>
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">Расшифровать</button>
+                    </form>
+                </div>
+                <form method="post" action="{{ url_for('main.save_settings', scope='update') }}" class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Пароль для шифрования</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    {% for field in update_fields %}
+                    <div class="col-12">
+                        <label class="form-label">{{ field.label }}</label>
+                        <input name="{{ field.name }}" value="{{ update_values.get(field.name, '') }}" class="form-control" placeholder="{{ field.placeholder }}">
+                    </div>
+                    {% endfor %}
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">Используется для чтения/сохранения конфигов и сценариев.</span>
+                        <button class="btn btn-primary" type="submit">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card shadow-sm mt-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="card-title mb-1">Редактирование конфигов онлайн</h5>
+                <p class="text-muted small mb-0">Загружайте и сохраняйте файлы напрямую на SFTP. Работает с соответствующими секциями.</p>
+            </div>
+            <div class="btn-group" role="group">
+                <button class="btn btn-outline-primary btn-sm" form="editor-load-gen">Открыть генерацию</button>
+                <button class="btn btn-outline-primary btn-sm" form="editor-load-upd">Открыть обновление</button>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <form id="editor-load-gen" method="post" action="{{ url_for('main.edit_remote_config', scope='generation') }}" class="card card-body shadow-none border">
+                    <h6 class="mb-2">Файл генерации</h6>
+                    <input name="remote_file" class="form-control mb-2" placeholder="/var/www/html/auth_menu/menu.xlsx" value="{{ editor_path if editor_scope == 'generation' else '' }}">
+                    <input type="hidden" name="action" value="load">
+                </form>
+                <form id="editor-load-upd" method="post" action="{{ url_for('main.edit_remote_config', scope='update') }}" class="card card-body shadow-none border mt-2">
+                    <h6 class="mb-2">Файл обновления</h6>
+                    <input name="remote_file" class="form-control mb-2" placeholder="/var/www/html/YANDEX/yabussines.json" value="{{ editor_path if editor_scope == 'update' else '' }}">
+                    <input type="hidden" name="action" value="load">
+                </form>
+            </div>
+            <div class="col-lg-8">
+                <form method="post" action="{{ url_for('main.edit_remote_config', scope=editor_scope or 'generation') }}" class="d-flex flex-column h-100">
+                    <input type="hidden" name="action" value="save">
+                    <input type="hidden" name="remote_file" value="{{ editor_path or '' }}">
+                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-primary me-2">{{ editor_scope or 'generation' }}</span>
+                            <span class="text-muted small">{{ editor_path or 'Укажите путь и нажмите открыть' }}</span>
+                        </div>
+                        <button class="btn btn-success btn-sm" type="submit" {% if not editor_content %}disabled{% endif %}>Сохранить изменения</button>
+                    </div>
+                    <textarea name="content" class="form-control flex-grow-1" rows="12" placeholder="Содержимое файла появится здесь" {% if not editor_content %}disabled{% endif %}>{{ editor_content or '' }}</textarea>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

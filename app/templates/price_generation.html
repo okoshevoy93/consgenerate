@@ -3,9 +3,12 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h2 class="mb-0">Генерация прайсов</h2>
-        <p class="text-muted">Работа с меню, файлами и загрузкой на сервер. Конфигурация берётся из зашифрованного файла.</p>
+        <p class="text-muted">Все ключевые параметры из скрипта console_generate_full_clean_progress_staticbar_FIXED2 вынесены в карточки ниже.</p>
     </div>
-    <a href="{{ url_for('main.config_page', config_name='sftp_price') }}" class="btn btn-outline-primary">Настроить SFTP</a>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('main.settings') }}" class="btn btn-outline-secondary">Настройки путей</a>
+        <a href="{{ url_for('main.config_page', config_name='sftp_price') }}" class="btn btn-outline-primary">SFTP</a>
+    </div>
 </div>
 <div class="row g-3">
     <div class="col-lg-5">
@@ -58,6 +61,42 @@
                         <button class="btn btn-primary" type="submit">Запустить процесс</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row g-3 mt-2">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title">Директории выгрузки</h5>
+                    <span class="badge bg-light text-primary">YML / CSV / XLSX</span>
+                </div>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item">YML Яндекс: <strong>{{ settings.get('yml_output', '—') }}</strong></li>
+                    <li class="list-group-item">CSV 2GIS: <strong>{{ settings.get('csv_output', '—') }}</strong></li>
+                    <li class="list-group-item">XLSX Яндекс: <strong>{{ settings.get('xlsx_output', '—') }}</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title">Города и локации</h5>
+                    <span class="badge bg-light text-success">RF / KZ / RB</span>
+                </div>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item">РФ: {{ settings.get('cities_rf', '—') }}</li>
+                    <li class="list-group-item">КЗ: {{ settings.get('cities_kz', '—') }}</li>
+                    <li class="list-group-item">РБ: {{ settings.get('cities_rb', '—') }}</li>
+                    <li class="list-group-item">Google РФ: {{ settings.get('google_links_rf', '—') }}</li>
+                    <li class="list-group-item">Google КЗ: {{ settings.get('google_links_kz', '—') }}</li>
+                    <li class="list-group-item">Google РБ: {{ settings.get('google_links_rb', '—') }}</li>
+                    <li class="list-group-item">API JSON: {{ settings.get('google_api_json', '—') }}</li>
+                </ul>
             </div>
         </div>
     </div>

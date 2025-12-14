@@ -2,10 +2,13 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h2 class="mb-0">Автоматизация Яндекс.Карт</h2>
-        <p class="text-muted">Интерактивная панель для сценариев из auto (3).py: загрузка файлов, выбор городов, управление паузами.</p>
+        <h2 class="mb-0">Обновление Яндекс.Карт</h2>
+        <p class="text-muted">Логика auto.py с управлением сценариями, городами и конфигами, включая hotfix сценарии и фото.</p>
     </div>
-    <a href="{{ url_for('main.config_page', config_name='sftp_auto') }}" class="btn btn-outline-primary">Настроить SFTP</a>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('main.settings') }}" class="btn btn-outline-secondary">Настройки путей</a>
+        <a href="{{ url_for('main.config_page', config_name='sftp_auto') }}" class="btn btn-outline-primary">SFTP</a>
+    </div>
 </div>
 <div class="row g-3">
     <div class="col-lg-5">
@@ -57,6 +60,37 @@
                         <button class="btn btn-primary" type="submit">Запустить</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row g-3 mt-2">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title">Файлы конфигурации</h5>
+                    <span class="badge bg-light text-primary">auto.py</span>
+                </div>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item">Конфиг: {{ settings.get('automation_config', '—') }}</li>
+                    <li class="list-group-item">Папка сценариев: {{ settings.get('scenario_remote', '—') }}</li>
+                    <li class="list-group-item">Mapping/Menu: {{ settings.get('mapping_remote', '—') }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title">Справочники и медиа</h5>
+                    <span class="badge bg-light text-success">контент</span>
+                </div>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item">Справочник городов: {{ settings.get('city_reference', '—') }}</li>
+                    <li class="list-group-item">Медиа/скриншоты: {{ settings.get('media_remote', '—') }}</li>
+                </ul>
             </div>
         </div>
     </div>

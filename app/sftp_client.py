@@ -41,6 +41,23 @@ class SFTPClient:
         self._client.get(remote, str(destination))
         return destination
 
+    def read_text(self, remote_path: str, encoding: str = "utf-8") -> str:
+        remote = remote_path.replace("\\", "/")
+        with self._client.file(remote, mode="r") as handle:  # type: ignore[attr-defined]
+            return handle.read().decode(encoding)
+
+    def write_text(self, remote_path: str, content: str, encoding: str = "utf-8") -> str:
+        remote = remote_path.replace("\\", "/")
+        folder = os.path.dirname(remote) or self.config.remote_path
+        folder = folder.replace("\\", "/")
+        try:
+            self._client.stat(folder)
+        except IOError:
+            self._ensure_remote_dir(folder)
+        with self._client.file(remote, mode="w") as handle:  # type: ignore[attr-defined]
+            handle.write(content.encode(encoding))
+        return remote
+
     def upload(self, local_file: Path, remote_folder: Optional[str] = None) -> str:
         folder = remote_folder or self.config.remote_path
         folder = folder.replace("\\", "/")
