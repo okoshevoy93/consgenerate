@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Прайсы</h2>
+    <span class="badge bg-primary">SFTP + генерация</span>
+</div>
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card glass h-100">
+            <div class="card-body">
+                <h5 class="card-title">Конфигурация подключения</h5>
+                <form method="post" action="{{ url_for('price.dashboard') }}">
+                    <input type="hidden" name="action" value="load_config">
+                    <div class="mb-3">
+                        <label class="form-label">Пароль для расшифровки</label>
+                        <input type="password" name="secret" class="form-control" placeholder="Введите пароль" required>
+                    </div>
+                    <button class="btn btn-outline-light w-100">Загрузить конфиг</button>
+                </form>
+                <hr>
+                <form method="post" action="{{ url_for('price.save_config') }}">
+                    <div class="row g-2">
+                        <div class="col-6"><label class="form-label">Хост</label><input type="text" class="form-control" name="host" value="{{ config.host if config }}" required></div>
+                        <div class="col-6"><label class="form-label">Порт</label><input type="number" class="form-control" name="port" value="{{ config.port if config else 22 }}" required></div>
+                        <div class="col-6"><label class="form-label">Логин</label><input type="text" class="form-control" name="username" value="{{ config.username if config }}" required></div>
+                        <div class="col-6"><label class="form-label">Пароль</label><input type="password" class="form-control" name="password" value="{{ config.password if config }}" required></div>
+                        <div class="col-12"><label class="form-label">Папка прайсов (SFTP)</label><input type="text" class="form-control" name="remote_path" value="{{ config.remote_path if config else '/var/www/html/auth_menu/' }}" required></div>
+                        <div class="col-12"><label class="form-label">Папка фото</label><input type="text" class="form-control" name="photo_path" value="{{ config.photo_path if config else '/var/www/html/img/TEST' }}"></div>
+                        <div class="col-12"><label class="form-label">Пароль для шифрования</label><input type="password" class="form-control" name="secret" required></div>
+                    </div>
+                    <div class="d-grid mt-3 gap-2">
+                        <button class="btn btn-success">Сохранить в шифре</button>
+                    </div>
+                </form>
+                <form class="mt-2" method="post" action="{{ url_for('price.test_connection') }}">
+                    <div class="input-group">
+                        <input type="password" class="form-control" name="secret" placeholder="Пароль к конфигу" required>
+                        <button class="btn btn-outline-primary">Тест SFTP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card glass h-100">
+            <div class="card-body">
+                <h5 class="card-title">Генерация</h5>
+                <p class="text-muted">Загрузите CSV или Excel — система превратит файл в CSV и выведет предпросмотр как это делал исходный скрипт.</p>
+                <form method="post" action="{{ url_for('price.process_file') }}" enctype="multipart/form-data" class="mb-3">
+                    <div class="row g-2">
+                        <div class="col-12"><label class="form-label">Файл прайса</label><input class="form-control" type="file" name="dataset" accept=".csv,.xlsx,.xls" required></div>
+                        <div class="col-12"><label class="form-label">Пароль к конфигу</label><input type="password" class="form-control" name="secret" required></div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button class="btn btn-primary">Обработать</button>
+                    </div>
+                </form>
+
+                {% if summary %}
+                    <div class="alert alert-info">Найдено {{ summary.records }} строк. Итоговый CSV готов к отправке.</div>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-dark table-striped align-middle">
+                            <thead><tr>{% for col in summary.columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+                            <tbody>
+                                {% for row in summary.preview %}
+                                    <tr>{% for col in summary.columns %}<td>{{ row[col] }}</td>{% endfor %}</tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <form method="post" action="{{ url_for('price.upload_generated') }}">
+                        <input type="hidden" name="secret" value="{{ secret }}">
+                        <input type="hidden" name="csv_path" value="{{ summary.temp_path }}">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success">Отправить на SFTP</button>
+                            <a class="btn btn-outline-light" href="{{ url_for('price.dashboard') }}">Сбросить</a>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="placeholder-glow">
+                        <p class="placeholder col-12"></p>
+                        <p class="placeholder col-10"></p>
+                        <p class="placeholder col-8"></p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

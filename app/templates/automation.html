@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Автоматизация</h2>
+    <span class="badge bg-warning text-dark">Вкладка auto (3).py</span>
+</div>
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card glass h-100">
+            <div class="card-body">
+                <h5 class="card-title">Конфиг SFTP</h5>
+                <form method="post" action="{{ url_for('automation.dashboard') }}">
+                    <input type="hidden" name="action" value="load_config">
+                    <div class="mb-3">
+                        <label class="form-label">Пароль для расшифровки</label>
+                        <input type="password" name="secret" class="form-control" required>
+                    </div>
+                    <button class="btn btn-outline-light w-100">Загрузить конфиг</button>
+                </form>
+                <hr>
+                <form method="post" action="{{ url_for('automation.save_config') }}">
+                    <div class="row g-2">
+                        <div class="col-6"><label class="form-label">Хост</label><input type="text" class="form-control" name="host" value="{{ config.host if config }}" required></div>
+                        <div class="col-6"><label class="form-label">Порт</label><input type="number" class="form-control" name="port" value="{{ config.port if config else 22 }}" required></div>
+                        <div class="col-6"><label class="form-label">Логин</label><input type="text" class="form-control" name="username" value="{{ config.username if config }}" required></div>
+                        <div class="col-6"><label class="form-label">Пароль</label><input type="password" class="form-control" name="password" value="{{ config.password if config }}" required></div>
+                        <div class="col-12"><label class="form-label">Путь для выгрузки файлов</label><input type="text" class="form-control" name="remote_path" value="{{ config.remote_path if config else '/var/www/html/YANDEX/XLS/' }}" required></div>
+                        <div class="col-12"><label class="form-label">Путь для карт соответствий</label><input type="text" class="form-control" name="mapping_path" value="{{ config.mapping_path if config else '/var/www/html/auth_menu/' }}" required></div>
+                        <div class="col-12"><label class="form-label">Пароль для шифрования</label><input type="password" class="form-control" name="secret" required></div>
+                    </div>
+                    <div class="d-grid mt-3 gap-2">
+                        <button class="btn btn-success">Сохранить настройки</button>
+                    </div>
+                </form>
+                <form class="mt-2" method="post" action="{{ url_for('automation.test_connection') }}">
+                    <div class="input-group">
+                        <input type="password" class="form-control" name="secret" placeholder="Пароль к конфигу" required>
+                        <button class="btn btn-outline-primary">Тест SFTP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card glass h-100">
+            <div class="card-body">
+                <h5 class="card-title">Работа с городами</h5>
+                <p class="text-muted">Поиск по списку, выбор и выгрузка карт соответствий.</p>
+                <div class="mb-3">
+                    <label class="form-label">Поиск города</label>
+                    <input type="text" id="city-search" class="form-control" placeholder="Москва...">
+                </div>
+                <ul class="list-group mb-4" id="city-list">
+                    {% for city in cities %}
+                        <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center">
+                            <span>{{ city }}</span>
+                            <span class="badge bg-secondary">доступен</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <form method="post" action="{{ url_for('automation.upload_mapping') }}" enctype="multipart/form-data" class="mt-auto">
+                    <div class="row g-2">
+                        <div class="col-12"><label class="form-label">Файл карты</label><input class="form-control" type="file" name="mapping" accept=".csv,.xlsx,.xls,.zip" required></div>
+                        <div class="col-12"><label class="form-label">Пароль к конфигу</label><input type="password" class="form-control" name="secret" required></div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button class="btn btn-warning text-dark">Загрузить на SFTP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const searchInput = document.getElementById('city-search');
+const list = document.getElementById('city-list');
+searchInput.addEventListener('input', async (ev) => {
+    const query = ev.target.value;
+    const res = await fetch(`{{ url_for('automation.search_cities') }}?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    list.innerHTML = '';
+    data.results.forEach(city => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item bg-dark text-light d-flex justify-content-between align-items-center';
+        li.innerHTML = `<span>${city}</span><span class="badge bg-secondary">доступен</span>`;
+        list.appendChild(li);
+    });
+});
+</script>
+{% endblock %}

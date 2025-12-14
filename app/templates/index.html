@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card glass">
+            <div class="card-body">
+                <h5 class="card-title">Генератор прайсов</h5>
+                <p class="card-text">Веб-интерфейс для скрипта console_generate_full_clean_progress_staticbar_FIXED2. Загружайте файлы, управляйте путями и отправляйте результаты на SFTP.</p>
+                <a class="btn btn-primary" href="{{ url_for('price.dashboard') }}">Открыть модуль</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card glass">
+            <div class="card-body">
+                <h5 class="card-title">Авторазмещение</h5>
+                <p class="card-text">Веб-версия программы auto (3).py с быстрым выбором города, загрузкой карт соответствий и отправкой на SFTP.</p>
+                <a class="btn btn-warning" href="{{ url_for('automation.dashboard') }}">Перейти к вкладке</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
