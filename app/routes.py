@@ -64,7 +64,7 @@ def config_page(config_name: str):
         payload = _parse_config_form(request.form)
         store.save(payload, password)
         flash('Конфигурация сохранена и зашифрована', 'success')
-        return redirect(url_for('config_page', config_name=config_name))
+        return redirect(url_for('main.config_page', config_name=config_name))
     if store.exists():
         values = {"sftp_port": 22}
     return render_template('config.html', config_label=label, values=values)
@@ -80,7 +80,7 @@ def load_config(config_name: str):
     else:
         LOADED_CONFIGS[config_name] = SFTPConfig(**data)
         flash('Конфигурация загружена', 'success')
-    target = 'price_generation' if config_name == 'sftp_price' else 'automation'
+    target = 'main.price_generation' if config_name == 'sftp_price' else 'main.automation'
     return redirect(url_for(target))
 
 
@@ -98,7 +98,7 @@ def run_price_generation():
     config = LOADED_CONFIGS.get('sftp_price')
     if not config:
         flash('Сначала загрузите конфигурацию', 'warning')
-        return redirect(url_for('price_generation'))
+        return redirect(url_for('main.price_generation'))
 
     local_file = None
     file = request.files.get('local_file')
@@ -119,7 +119,7 @@ def run_price_generation():
     except Exception as exc:  # noqa: BLE001
         LAST_ACTIVITY['price'] = f"Ошибка: {exc}"
         flash('Ошибка при выполнении: %s' % exc, 'danger')
-    return redirect(url_for('price_generation'))
+    return redirect(url_for('main.price_generation'))
 
 
 @main_bp.route('/automation')
@@ -137,7 +137,7 @@ def run_automation_action():
     config = LOADED_CONFIGS.get('sftp_auto')
     if not config:
         flash('Сначала загрузите конфигурацию', 'warning')
-        return redirect(url_for('automation'))
+        return redirect(url_for('main.automation'))
 
     scenario_path: Optional[Path] = None
     file = request.files.get('scenario')
@@ -158,4 +158,4 @@ def run_automation_action():
     except Exception as exc:  # noqa: BLE001
         LAST_ACTIVITY['automation'] = f"Ошибка: {exc}"
         flash('Ошибка при выполнении: %s' % exc, 'danger')
-    return redirect(url_for('automation'))
+    return redirect(url_for('main.automation'))

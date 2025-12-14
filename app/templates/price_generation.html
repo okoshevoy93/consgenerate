@@ -5,7 +5,7 @@
         <h2 class="mb-0">Генерация прайсов</h2>
         <p class="text-muted">Работа с меню, файлами и загрузкой на сервер. Конфигурация берётся из зашифрованного файла.</p>
     </div>
-    <a href="{{ url_for('config_page', config_name='sftp_price') }}" class="btn btn-outline-primary">Настроить SFTP</a>
+    <a href="{{ url_for('main.config_page', config_name='sftp_price') }}" class="btn btn-outline-primary">Настроить SFTP</a>
 </div>
 <div class="row g-3">
     <div class="col-lg-5">
@@ -22,7 +22,7 @@
                 {% else %}
                     <p class="text-warning">Сначала расшифруйте и сохраните параметры.</p>
                 {% endif %}
-                <form method="post" action="{{ url_for('load_config', config_name='sftp_price') }}" class="d-flex gap-2">
+                <form method="post" action="{{ url_for('main.load_config', config_name='sftp_price') }}" class="d-flex gap-2">
                     <input type="password" name="password" class="form-control" placeholder="Пароль" required>
                     <button class="btn btn-secondary" type="submit">Загрузить</button>
                 </form>
@@ -33,7 +33,7 @@
         <div class="card shadow-sm h-100">
             <div class="card-body">
                 <h5 class="card-title">Операции</h5>
-                <form method="post" action="{{ url_for('run_price_generation') }}" enctype="multipart/form-data" class="row g-3">
+                <form method="post" action="{{ url_for('main.run_price_generation') }}" enctype="multipart/form-data" class="row g-3">
                     <div class="col-12">
                         <label class="form-label">Пароль дешифровки</label>
                         <input type="password" name="password" class="form-control" required>
