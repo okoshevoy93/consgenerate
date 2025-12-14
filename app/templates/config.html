@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-3">Настройки {{ config_label }}</h2>
+<p class="text-muted">Данные хранятся в зашифрованном файле. Пароль нужен для дешифровки и сохранения.</p>
+<form method="post">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">SFTP хост</label>
+            <input name="sftp_host" value="{{ values.sftp_host or '' }}" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Порт</label>
+            <input name="sftp_port" value="{{ values.sftp_port or 22 }}" type="number" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Пароль дешифровки</label>
+            <input name="password" type="password" class="form-control" placeholder="Введите пароль" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Пользователь</label>
+            <input name="sftp_user" value="{{ values.sftp_user or '' }}" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Пароль SFTP</label>
+            <input name="sftp_pass" value="{{ values.sftp_pass or '' }}" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Основной удалённый путь</label>
+            <input name="remote_path" value="{{ values.remote_path or '' }}" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Путь для медиа/картинок</label>
+            <input name="media_path" value="{{ values.media_path or '' }}" class="form-control">
+        </div>
+        <div class="col-12">
+            <label class="form-label">Дополнительные параметры (JSON)</label>
+            <textarea name="extra" rows="4" class="form-control" placeholder='{"price_category":"000..."}'>{{ values.extra or '' }}</textarea>
+        </div>
+    </div>
+    <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary" type="submit">Сохранить и зашифровать</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('home') }}">Отмена</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">Генерация прайсов</h2>
+        <p class="text-muted">Работа с меню, файлами и загрузкой на сервер. Конфигурация берётся из зашифрованного файла.</p>
+    </div>
+    <a href="{{ url_for('config_page', config_name='sftp_price') }}" class="btn btn-outline-primary">Настроить SFTP</a>
+</div>
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Конфигурация</h5>
+                {% if config %}
+                <ul class="list-unstyled small text-muted">
+                    <li><strong>Хост:</strong> {{ config.sftp_host }}</li>
+                    <li><strong>Пользователь:</strong> {{ config.sftp_user }}</li>
+                    <li><strong>Основной путь:</strong> {{ config.remote_path }}</li>
+                    <li><strong>Медиа:</strong> {{ config.media_path }}</li>
+                </ul>
+                {% else %}
+                    <p class="text-warning">Сначала расшифруйте и сохраните параметры.</p>
+                {% endif %}
+                <form method="post" action="{{ url_for('load_config', config_name='sftp_price') }}" class="d-flex gap-2">
+                    <input type="password" name="password" class="form-control" placeholder="Пароль" required>
+                    <button class="btn btn-secondary" type="submit">Загрузить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Операции</h5>
+                <form method="post" action="{{ url_for('run_price_generation') }}" enctype="multipart/form-data" class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Пароль дешифровки</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Имя удалённого файла для скачивания</label>
+                        <input name="download_file" class="form-control" placeholder="menu.xlsx">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Имя результирующего файла для загрузки</label>
+                        <input name="upload_file" class="form-control" placeholder="menu_ready.xlsx">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Локальный файл для загрузки на сервер</label>
+                        <input type="file" name="local_file" class="form-control">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Комментарии к задаче</label>
+                        <textarea name="notes" rows="3" class="form-control" placeholder="Что нужно сделать в этом прогоне"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" type="submit">Запустить процесс</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% if activity %}
+<div class="card shadow-sm mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Последний прогон</h5>
+        <pre class="mb-0 small bg-light p-3 rounded">{{ activity }}</pre>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
